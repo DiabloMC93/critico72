@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Cuidados Críticos - Bloque 33-64</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0a09;
+            color: #f5f5f4;
+        }
+
+        .glass-card {
+            background: rgba(28, 25, 23, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(41, 37, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: rgba(68, 64, 60, 0.8);
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .correct {
+            background-color: #064e3b !important;
+            border-color: #10b981 !important;
+            color: #d1fae5 !important;
+        }
+
+        .incorrect {
+            background-color: #450a0a !important;
+            border-color: #ef4444 !important;
+            color: #fee2e2 !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-3xl">
+        <div id="quiz-screen">
+            <div class="mb-8">
+                <div class="flex justify-between items-end mb-4 px-1">
+                    <div>
+                        <h1 class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Enfermería de Cuidados Críticos</h1>
+                        <span id="question-index" class="text-2xl font-bold text-white">Pregunta 1 de 32</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="bg-stone-900 px-3 py-1 rounded-lg border border-stone-800 text-center min-w-[60px]">
+                            <span class="text-[10px] text-green-500 font-bold uppercase block">Bien</span>
+                            <span id="score-correct" class="text-green-400 font-bold text-xl">0</span>
+                        </div>
+                        <div class="bg-stone-900 px-3 py-1 rounded-lg border border-stone-800 text-center min-w-[60px]">
+                            <span class="text-[10px] text-red-500 font-bold uppercase block">Mal</span>
+                            <span id="score-incorrect" class="text-red-400 font-bold text-xl">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full bg-stone-900 h-2 rounded-full overflow-hidden">
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 md:p-10 rounded-3xl mb-6 shadow-2xl">
+                <h2 id="question-text" class="text-lg md:text-xl font-semibold mb-8 text-stone-100 leading-tight"></h2>
+                <div id="options-container" class="grid gap-3"></div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="next-btn" onclick="quiz.next()" class="hidden bg-white text-black px-12 py-4 rounded-2xl font-bold hover:bg-stone-200 transition-all shadow-xl active:scale-95">
+                    Siguiente Pregunta
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden glass-card p-12 rounded-[2.5rem] text-center">
+            <h2 class="text-3xl font-bold mb-4 text-white">Resultados Finales</h2>
+            <div class="flex justify-center gap-8 mb-8">
+                <div>
+                    <p class="text-stone-500 text-sm mb-1 uppercase">Aciertos</p>
+                    <p id="final-correct" class="text-5xl font-bold text-green-400">0</p>
+                </div>
+                <div>
+                    <p class="text-stone-500 text-sm mb-1 uppercase">Errores</p>
+                    <p id="final-incorrect" class="text-5xl font-bold text-red-400">0</p>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-bold text-lg">
+                Reiniciar Test
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "33. Cuando está en alta montaña la falta de oxígeno provoca una hiperventilación que deriva en una:", a: ["Acidosis respiratoria", "Acidosis metabólica", "Alcalosis respiratoria", "Alcalosis metabólica"], c: 2 },
+            { q: "34. ¿Cuál es la complicación o complicaciones frecuentes durante la aspiración a través del tubo endotraqueal?", a: ["Hipoxia y broncoespasmo", "Edema de glotis e infección nosocomial", "Hipoxia, broncoespasmo e infección nosocomial", "Hemorragia traqueal e hipoxia"], c: 2 },
+            { q: "35. ¿En qué ritmo de los siguientes está indicada la cardioversión?", a: ["TVSP", "Perforación arterial", "Fibrilación Auricular (FA)", "Asistolia"], c: 2 },
+            { q: "36. ¿Qué es la paracentesis?", a: ["Extracción de líquido o aire del espacio pleural", "Extracción de líquido del espacio abdominal", "Extracción de líquido cefalorraquídeo", "Procedimiento para la administración de analgesia epidural"], c: 1 },
+            { q: "37. ¿Cuál es el objetivo del marcapasos temporal?", a: ["Evitar las taquiarritmias", "Mantener la saturación de oxígeno", "Mantener la frecuencia cardíaca hasta que la arritmia crítica haya pasado", "Ninguna es correcta"], c: 2 },
+            { q: "38. ¿Qué riesgo tiene si el guedel es muy grande?", a: ["Edema de la glotis", "Caída de la lengua hacia atrás", "Ninguna", "Necrosis"], c: 3 },
+            { q: "39. El marcapaso temporal en modo sincronizado señala la opción correcta:", a: ["Como complicación tiene la posibilidad de provocar taquiarritmias", "La capacidad de detectar la actividad cárdica depende de la frecuencia cardíaca", "Tiene una estimulación a frecuencia intermitente", "Si detecta el latido bajo deja de mandar estímulo"], c: 3 },
+            { q: "40. Por qué el paciente debe orinar antes de la paracentesis:", a: ["Evitar pinchazos en la vejiga", "Debe orinar después de la prueba, no antes", "Evitar infección", "Evitar micción durante la prueba"], c: 0 },
+            { q: "41. Señale cuál o cuáles serían las indicaciones para pericardiocentesis:", a: ["Prevenir hemorragias", "El taponamiento cardíaco mejora el volumen minuto", "Disminuir la frecuencia cardíaca", "Disminuir hemorragia"], c: 1 },
+            { q: "42. Los mecanismo que pueden ponerse en marcha para compensar una acidosis metabólica son:", a: ["Hipoventilación pulmonar", "Disminución de la reabsorción de bicarbonato y en la excreción de H+", "Hiperventilación pulmonar", "Incremento de la reabsorción de bicarbonato en la excreción de H+"], c: 2 },
+            { q: "43. Los mecanismos que pueden ponerse en marcha para compensar una alcalosis respiratoria son:", a: ["Incrementos de la reabsorción de bicarbonato y en la excreción de H+", "Disminución de la reabsorción de bicarbonato y en la excreción de H+", "Hipoventilación pulmonar", "Hiperventilación pulmonar"], c: 1 },
+            { q: "44. Entra un paciente en coma diabética con pH 7.30, PCO2 36, HCO3 17. Presenta:", a: ["Acidosis respiratoria en fase aguda", "Acidosis metabólica en fase aguda", "Acidosis respiratoria compensada", "Alcalosis metabólica compensada"], c: 1 },
+            { q: "45. Cuál de las siguientes contraindicaciones de VMNI es cierta:", a: ["Todas son correctas", "Traumatismo facial", "Bajo nivel de conciencia", "Inestabilidad hemodinámica"], c: 0 },
+            { q: "46. Si aumentamos en exceso el voltaje del marcapasos que podemos producir:", a: ["Nada, lo importante es que funcione", "Que el paciente se quede inconsciente", "Infarto", "Quemaduras"], c: 3 },
+            { q: "47. Indique cuáles serían los cuidados posteriores a una punción lumbar:", a: ["Reposo abs. 6h y rel. 24h, prono con almohada en cadera 6h, 1.5-2 l liq.", "Reposo abs. 12h y rel. 24h, prono con almohada en cadera 2h, 1.5-2 l liq.", "Reposo abs. 6h y rel. 12h, prono con almohada en cadera 2h, 1.5-2 l liq.", "Reposo abs. 6h y rel. 24h, prono con almohada en cadera 2h, 1.5-2 l liq."], c: 3 },
+            { q: "48. Ante un traslado de un paciente crítico con drenaje torácico y aspiración continua:", a: ["Podemos trasladar sin aspiraciones, el sello de agua mantiene estanqueidad", "Pinzar el drenaje tras desconectar la aspiración", "Desconectar aspiración manteniendo la presión por debajo del nivel del paciente", "Se debe mantener la aspiración en todo modo"], c: 2 },
+            { q: "49. Inconveniente del uso de sistemas asistidos (señala la INCORRECTA):", a: ["No garantiza un volumen minuto constante", "No requiere de esfuerzo activo por parte del paciente", "Requiere de esfuerzo activo por parte del paciente", "Todas son correctas"], c: 1 },
+            { q: "50. Qué opción es FALSA sobre la traqueotomía percutánea:", a: ["Precisa cánula fenestrada por la fonación", "El cierre del estoma se produce por primera intención", "Está indicada cuando el destete es ineficaz", "Se puede realizar con Glasgow < 8 e intubación difícil"], c: 1 },
+            { q: "51. Gasometría venosa: PO2 40, PCO2 30, pH 7.22, HCO3 17. Se afirma que tiene:", a: ["Insuficiencia respiratoria, hipocapnia y acidosis metabólica", "Insuficiencia respiratoria, hipercapnia y acidosis metabólica", "Hipercapnia y acidosis respiratoria", "Acidosis metabólica"], c: 0 },
+            { q: "52. Qué vaso toma un acceso venoso central al entrar en el corazón:", a: ["Arteria pulmonar", "Vena pulmonar", "Arteria Cava y Vena Cava", "Vena Cava"], c: 3 },
+            { q: "53. Qué diferencia existe entre ventiladores volumétricos y manométricos:", a: ["Volumétricos controlan O2, manométricos no", "Volumétricos no saben O2, manométricos no saben presión", "Volumétricos saben O2 introducido, manométricos saben presión de O2 introducida", "Volumétricos saben O2, manométricos no saben presión"], c: 2 },
+            { q: "54. Cuál es el objetivo de la cardioversión eléctrica:", a: ["Cardiovertir al ritmo sinusal", "Usarlo cuando el paciente no tenga pulso", "Mantener la frecuencia cardíaca", "Revertir la función cardíaca cuando está fibrilando"], c: 0 },
+            { q: "55. Qué técnica se utiliza previamente antes de canalizar un acceso arterial:", a: ["Técnica de Allen", "Técnica Miller", "Técnica Seldinger", "Técnica de Friedrich"], c: 0 },
+            { q: "56. Alarma de volumen minuto bajo en VM puede ser debido a:", a: ["Acodamiento del tubo", "Aumento de las secreciones", "Presencia de broncoespasmo", "Desconexión del paciente"], c: 3 },
+            { q: "57. UCI: pH 7.21, CO2 50, HCO3 17, BE -1. ¿Qué alteración presenta?", a: ["Ninguna es correcta", "Acidosis respiratoria aguda", "Alcalosis metabólica compensada", "Acidosis respiratoria compensada"], c: 0 },
+            { q: "58. En una secuencia rápida de intubación, NO es correcta:", a: ["Administración de un hipnótico de acción rápida y duradera", "Fase de oxigenación previa", "Aplicación de presión cricotiroidea", "Administración de un bloqueante neuromuscular de acción rápida y breve"], c: 0 },
+            { q: "59. Respecto a la traqueotomía percutánea señala la INCORRECTA:", a: ["Indicada en intubaciones dificultosas", "Punción en 3-4º espacio cartílago traqueal superior", "Es el método definitivo de aislamiento de la vía aérea", "Se puede realizar en quirófano"], c: 2 },
+            { q: "60. Cuál NO es una indicación de aplicación de la capnografía:", a: ["Sospecha de presión intracraneal aumentada", "Verificación de la colocación del tubo endotraqueal", "Intoxicación por CO", "Reanimación cardiopulmonar"], c: 2 },
+            { q: "61. Parámetro que fija cuando se va a iniciar la inspiración del nuevo ciclo:", a: ["Trigger", "Inspiración (I:E)", "Volumen tidal", "PEEP"], c: 0 },
+            { q: "62. Drenaje torácico: el agua asciende al inspirar y desciende al espirar. Acción:", a: ["Observar tubos por si existe obstrucción", "Observar posibles acodamientos", "Ninguna, ya que es normal", "Revisar las conexiones"], c: 2 },
+            { q: "63. Tras prueba de respiración espontánea, ¿qué hallazgo acarrea más problemas?", a: ["PEEP 5", "PiO2 40%", "Volumen minuto 5 l/min", "PVC 6"], c: 2 },
+            { q: "64. Posición de electrodos de marcapaso transcutáneo para no interferir en desfibrilación:", a: ["Ant-Post: + rojo infraescapular, - negro precordial", "Ant-Ant: - rojo inframamario, + negro infraclavicular", "Ant-Ant: + rojo infraclavicular, - negro inframamario", "Ant-Post: - rojo precordial, + negro infraescapular"], c: 3 }
+        ];
+
+        class Quiz {
+            constructor() {
+                this.idx = 0;
+                this.correct = 0;
+                this.incorrect = 0;
+                this.answered = false;
+            }
+
+            render() {
+                this.answered = false;
+                const q = questions[this.idx];
+                document.getElementById('question-index').innerText = `Pregunta ${this.idx + 1} de ${questions.length}`;
+                document.getElementById('question-text').innerText = q.q;
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('progress-fill').style.width = `${((this.idx + 1) / questions.length) * 100}%`;
+                
+                const container = document.getElementById('options-container');
+                container.innerHTML = '';
+                q.a.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn w-full text-left p-4 md:p-5 rounded-2xl font-medium text-stone-300';
+                    btn.innerText = opt;
+                    btn.onclick = () => this.check(i, btn);
+                    container.appendChild(btn);
+                });
+            }
+
+            updateScores() {
+                document.getElementById('score-correct').innerText = this.correct;
+                document.getElementById('score-incorrect').innerText = this.incorrect;
+            }
+
+            check(i, btn) {
+                if (this.answered) return;
+                this.answered = true;
+                const correctIdx = questions[this.idx].c;
+                const btns = document.querySelectorAll('.option-btn');
+                
+                if (i === correctIdx) {
+                    this.correct++;
+                    btn.classList.add('correct');
+                } else {
+                    this.incorrect++;
+                    btn.classList.add('incorrect');
+                    btns[correctIdx].classList.add('correct');
+                }
+                
+                this.updateScores();
+                btns.forEach(b => b.disabled = true);
+                document.getElementById('next-btn').classList.remove('hidden');
+            }
+
+            next() {
+                this.idx++;
+                if (this.idx < questions.length) {
+                    this.render();
+                } else {
+                    this.finish();
+                }
+            }
+
+            finish() {
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+                document.getElementById('final-correct').innerText = this.correct;
+                document.getElementById('final-incorrect').innerText = this.incorrect;
+            }
+        }
+
+        const quiz = new Quiz();
+        window.onload = () => quiz.render();
+    </script>
+</body>
+</html>
